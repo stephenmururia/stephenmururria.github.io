@@ -28,7 +28,7 @@ button{
     cursor:pointer;
 }
 #yes{background:#00e676;}
-#no{background:#ff1744;position:relative;}
+#no{background:#ff1744;}
 #msg{margin-top:30px;font-size:1.4rem;height:40px;}
 canvas{
     position:fixed;top:0;left:0;pointer-events:none;
@@ -44,10 +44,8 @@ canvas{
         but ours will be on friday😔😔
     </h1>
 
-    <div id="buttons">
-        <button id="yes">Yes ❤️</button>
-        <button id="no">No 😈</button>
-    </div>
+    <button id="yes">Yes ❤️</button>
+    <button id="no">No 😈</button>
 
     <div id="msg"></div>
 </div>
@@ -56,12 +54,11 @@ canvas{
 
 <script>
 let noCount = 0;
-let typingInterval = null;
+let typingInterval;
 
 const noBtn = document.getElementById('no');
 const yesBtn = document.getElementById('yes');
 const msg = document.getElementById('msg');
-const buttons = document.getElementById('buttons');
 const question = document.getElementById('question');
 
 // NO button
@@ -70,34 +67,24 @@ noBtn.onclick = () => {
     if(noCount === 1){
         msg.textContent = "haha! Nice try 😏 Answer again.";
     } else {
-        const x = Math.random() * (window.innerWidth - 100);
-        const y = Math.random() * (window.innerHeight - 50);
         noBtn.style.position = "fixed";
-        noBtn.style.left = x + "px";
-        noBtn.style.top = y + "px";
+        noBtn.style.left = Math.random()*(innerWidth-100)+"px";
+        noBtn.style.top = Math.random()*(innerHeight-50)+"px";
     }
 };
 
-// YES button (FULL RESET)
+// YES button
 yesBtn.onclick = () => {
 
-    // stop any typing still running
-    if(typingInterval){
-        clearInterval(typingInterval);
-    }
+    // remove both buttons completely
+    yesBtn.remove();
+    noBtn.remove();
 
-    // HARD CLEAR the message
+    // clear any old message
     msg.textContent = "";
-    msg.innerHTML = "";
+    question.textContent = "";
 
-    // hide old UI
-    buttons.style.display = "none";
-    question.innerText = "";
-
-    // start typing fresh
     typeMessage("see you on friday dear 😉😘");
-
-    // start fireworks
     startFireworks();
 };
 
@@ -105,11 +92,9 @@ yesBtn.onclick = () => {
 function typeMessage(text){
     let i = 0;
     typingInterval = setInterval(()=>{
-        msg.textContent += text.charAt(i);
+        msg.textContent += text[i];
         i++;
-        if(i >= text.length){
-            clearInterval(typingInterval);
-        }
+        if(i >= text.length) clearInterval(typingInterval);
     },70);
 }
 
@@ -119,7 +104,7 @@ const ctx = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-window.onresize = () => {
+window.onresize = ()=>{
     canvas.width = innerWidth;
     canvas.height = innerHeight;
 };
@@ -136,8 +121,8 @@ function launchRocket(){
     rockets.push({
         x:Math.random()*canvas.width,
         y:canvas.height,
-        speed:5,
-        targetY:Math.random()*canvas.height/2+50
+        targetY:Math.random()*canvas.height/2+50,
+        speed:5
     });
 }
 
@@ -179,9 +164,7 @@ function animate(){
         ctx.fillStyle="white";
         ctx.fill();
 
-        if(p.life<=0){
-            particles.splice(i,1);
-        }
+        if(p.life<=0) particles.splice(i,1);
     });
 
     requestAnimationFrame(animate);
