@@ -12,28 +12,40 @@ body{
     display:flex;
     justify-content:center;
     align-items:center;
-    text-align:center;
-    font-family:Arial, Helvetica, sans-serif;
     background:linear-gradient(135deg,#ff758c,#ff7eb3);
+    font-family:Arial, Helvetica, sans-serif;
     overflow:hidden;
     color:white;
 }
 
-h1{font-size:2rem;margin-bottom:30px;}
+.container{
+    text-align:center;
+    z-index:2;
+}
+
+h1{
+    font-size:1.8rem;
+    margin-bottom:25px;
+}
 
 button{
-    padding:15px 35px;
-    font-size:1.2rem;
+    padding:14px 32px;
+    font-size:1.1rem;
     border:none;
     border-radius:30px;
     margin:10px;
     cursor:pointer;
 }
 
-#yes{background:#00e676;color:white;}
-#no{background:#ff1744;color:white;position:relative;}
+#yes{background:#00e676;}
+#no{background:#ff1744; position:relative;}
 
-#msg{margin-top:20px;height:40px;font-size:1.3rem;}
+#msg{
+    margin-top:30px;
+    font-size:1.4rem;
+    height:40px;
+    letter-spacing:1px;
+}
 
 canvas{
     position:fixed;
@@ -46,27 +58,31 @@ canvas{
 
 <body>
 
-<div>
-    <h1 id="q">
+<div class="container">
+    <h1 id="question">
         will you be my valentine???<br>
         but ours will be on friday😔😔
     </h1>
 
-    <button id="yes">Yes ❤️</button>
-    <button id="no">No 😈</button>
+    <div id="buttons">
+        <button id="yes">Yes ❤️</button>
+        <button id="no">No 😈</button>
+    </div>
 
     <div id="msg"></div>
 </div>
 
-<canvas id="fw"></canvas>
+<canvas id="fireworks"></canvas>
 
 <script>
 let noCount = 0;
 const noBtn = document.getElementById('no');
 const yesBtn = document.getElementById('yes');
 const msg = document.getElementById('msg');
-const q = document.getElementById('q');
+const buttons = document.getElementById('buttons');
+const question = document.getElementById('question');
 
+// NO button behavior
 noBtn.onclick = () => {
     noCount++;
     if(noCount === 1){
@@ -80,51 +96,76 @@ noBtn.onclick = () => {
     }
 };
 
+// YES button behavior
 yesBtn.onclick = () => {
-    q.innerText = "see you on friday dear😉😘";
-    msg.innerText = "";
-    startFireworks();
+    buttons.style.display = "none";
+    question.innerText = "";
+    typeMessage("see you on friday dear 😉😘");
+    launchFireworks();
 };
 
-// fireworks
-const canvas = document.getElementById('fw');
+// typing effect
+function typeMessage(text){
+    let i = 0;
+    const interval = setInterval(()=>{
+        msg.innerText += text.charAt(i);
+        i++;
+        if(i >= text.length) clearInterval(interval);
+    }, 70);
+}
+
+// FIREWORKS SYSTEM
+const canvas = document.getElementById('fireworks');
 const ctx = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-let particles = [];
-let started = false;
+window.onresize = () => {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+};
 
-function startFireworks(){
-    if(started) return;
-    started = true;
-    setInterval(()=>{
-        for(let i=0;i<40;i++){
-            particles.push({
-                x:Math.random()*canvas.width,
-                y:Math.random()*canvas.height,
-                r:Math.random()*3+1,
-                dx:(Math.random()-0.5)*4,
-                dy:(Math.random()-0.5)*4,
-                a:1
-            });
-        }
-    },400);
+let particles = [];
+
+function launchFireworks(){
+    setInterval(createExplosion, 300);
     animate();
+}
+
+function createExplosion(){
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height;
+
+    for(let i=0;i<80;i++){
+        particles.push({
+            x:x,
+            y:y,
+            angle:Math.random()*2*Math.PI,
+            speed:Math.random()*5+2,
+            radius:Math.random()*3+1,
+            life:100
+        });
+    }
 }
 
 function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach((p,i)=>{
-        p.x+=p.dx;
-        p.y+=p.dy;
-        p.a-=0.01;
+
+    particles.forEach((p,index)=>{
+        p.x += Math.cos(p.angle)*p.speed;
+        p.y += Math.sin(p.angle)*p.speed;
+        p.life--;
+
         ctx.beginPath();
-        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-        ctx.fillStyle=`rgba(255,255,255,${p.a})`;
+        ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
+        ctx.fillStyle="white";
         ctx.fill();
-        if(p.a<=0) particles.splice(i,1);
+
+        if(p.life<=0){
+            particles.splice(index,1);
+        }
     });
+
     requestAnimationFrame(animate);
 }
 </script>
