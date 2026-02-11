@@ -17,17 +17,8 @@ body{
     overflow:hidden;
     color:white;
 }
-
-.container{
-    text-align:center;
-    z-index:2;
-}
-
-h1{
-    font-size:1.8rem;
-    margin-bottom:25px;
-}
-
+.container{text-align:center;z-index:2;}
+h1{font-size:1.8rem;margin-bottom:25px;}
 button{
     padding:14px 32px;
     font-size:1.1rem;
@@ -36,22 +27,11 @@ button{
     margin:10px;
     cursor:pointer;
 }
-
 #yes{background:#00e676;}
-#no{background:#ff1744; position:relative;}
-
-#msg{
-    margin-top:30px;
-    font-size:1.4rem;
-    height:40px;
-    letter-spacing:1px;
-}
-
+#no{background:#ff1744;position:relative;}
+#msg{margin-top:30px;font-size:1.4rem;height:40px;}
 canvas{
-    position:fixed;
-    top:0;
-    left:0;
-    pointer-events:none;
+    position:fixed;top:0;left:0;pointer-events:none;
 }
 </style>
 </head>
@@ -76,6 +56,8 @@ canvas{
 
 <script>
 let noCount = 0;
+let typingInterval = null;
+
 const noBtn = document.getElementById('no');
 const yesBtn = document.getElementById('yes');
 const msg = document.getElementById('msg');
@@ -86,7 +68,7 @@ const question = document.getElementById('question');
 noBtn.onclick = () => {
     noCount++;
     if(noCount === 1){
-        msg.innerText = "haha! Nice try 😏 Answer again.";
+        msg.textContent = "haha! Nice try 😏 Answer again.";
     } else {
         const x = Math.random() * (window.innerWidth - 100);
         const y = Math.random() * (window.innerHeight - 50);
@@ -96,23 +78,39 @@ noBtn.onclick = () => {
     }
 };
 
-// YES button
+// YES button (FULL RESET)
 yesBtn.onclick = () => {
-    msg.innerText = "";              // clear haha message
-    buttons.style.display = "none"; // hide buttons
+
+    // stop any typing still running
+    if(typingInterval){
+        clearInterval(typingInterval);
+    }
+
+    // HARD CLEAR the message
+    msg.textContent = "";
+    msg.innerHTML = "";
+
+    // hide old UI
+    buttons.style.display = "none";
     question.innerText = "";
+
+    // start typing fresh
     typeMessage("see you on friday dear 😉😘");
+
+    // start fireworks
     startFireworks();
 };
 
 // typing effect
 function typeMessage(text){
     let i = 0;
-    const interval = setInterval(()=>{
-        msg.innerText += text.charAt(i);
+    typingInterval = setInterval(()=>{
+        msg.textContent += text.charAt(i);
         i++;
-        if(i >= text.length) clearInterval(interval);
-    }, 70);
+        if(i >= text.length){
+            clearInterval(typingInterval);
+        }
+    },70);
 }
 
 // FIREWORKS
@@ -130,25 +128,25 @@ let rockets = [];
 let particles = [];
 
 function startFireworks(){
-    setInterval(launchRocket, 700);
+    setInterval(launchRocket,600);
     animate();
 }
 
 function launchRocket(){
     rockets.push({
-        x: Math.random() * canvas.width,
-        y: canvas.height,
-        speed: Math.random() * 3 + 4,
-        targetY: Math.random() * canvas.height/2 + 50
+        x:Math.random()*canvas.width,
+        y:canvas.height,
+        speed:5,
+        targetY:Math.random()*canvas.height/2+50
     });
 }
 
 function explode(x,y){
-    for(let i=0;i<60;i++){
+    for(let i=0;i<70;i++){
         particles.push({
             x:x,
             y:y,
-            angle:Math.random()*2*Math.PI,
+            angle:Math.random()*Math.PI*2,
             speed:Math.random()*4+2,
             life:80
         });
@@ -159,21 +157,21 @@ function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     rockets.forEach((r,i)=>{
-        r.y -= r.speed;
+        r.y-=r.speed;
         ctx.beginPath();
         ctx.arc(r.x,r.y,3,0,Math.PI*2);
         ctx.fillStyle="white";
         ctx.fill();
 
-        if(r.y <= r.targetY){
-            explode(r.x, r.y);
+        if(r.y<=r.targetY){
+            explode(r.x,r.y);
             rockets.splice(i,1);
         }
     });
 
     particles.forEach((p,i)=>{
-        p.x += Math.cos(p.angle)*p.speed;
-        p.y += Math.sin(p.angle)*p.speed;
+        p.x+=Math.cos(p.angle)*p.speed;
+        p.y+=Math.sin(p.angle)*p.speed;
         p.life--;
 
         ctx.beginPath();
